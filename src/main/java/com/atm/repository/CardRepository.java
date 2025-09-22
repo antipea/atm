@@ -1,13 +1,12 @@
 package com.atm.repository;
 
-import com.atm.models.entities.User;
+import com.atm.models.entities.Card;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
-Optional<User> findByUserNumberPassport (String numberPassport);
-
+public interface CardRepository extends JpaRepository<Card, Long> {
+    Optional<Card> findByCardNumber (String cardNumber);
 }

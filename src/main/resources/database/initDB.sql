@@ -1,114 +1,98 @@
-DROP TABLE IF EXISTS cards CASCADE
-;
-
-DROP TABLE IF EXISTS m2m_cards_payments CASCADE
-;
-
-DROP TABLE IF EXISTS payments CASCADE
-;
-
-DROP TABLE IF EXISTS rates CASCADE
-;
-
-DROP TABLE IF EXISTS users CASCADE
-;
+/*DROP TYPE IF EXISTS currency_code CASCADE;*/
+DROP TYPE IF EXISTS transaction_type CASCADE;
+DROP TYPE IF EXISTS transaction_status CASCADE;
 
 /* Create Tables */
 
-CREATE TABLE cards
-(
-    c_id uuid NOT NULL,
-    c_number varchar(50) NOT NULL,
-    c_pincode smallint NOT NULL,
-    c_currency varchar(50) NOT NULL,
-    с_date_expire date NOT NULL,
-    u_id uuid NOT NULL
-)
-;
+/*CREATE TYPE currency_code AS ENUM('BYN', 'USD', 'EUR', 'RUB');*/
+CREATE TYPE transaction_type AS ENUM('DEPOSIT', 'WITHDRAWAL', 'TRANSFER', 'PAYMENT');
+CREATE TYPE transaction_status AS ENUM('COMPLETED', 'FAILED');
 
-CREATE TABLE m2m_cards_payments
+CREATE TABLE IF NOT EXISTS users
 (
-    c_id uuid NOT NULL,
-    p_id serial NOT NULL,
-    pm_amount numeric NOT NULL,
-    pm_date date NOT NULL
-)
-;
-
-CREATE TABLE payments
-(
-    p_id serial NOT NULL,
-    p_name varchar(50) NOT NULL,
-    p_description text NULL,
-    p_code integer NOT NULL,
-    p_is_adding boolean NOT NULL
-)
-;
-
-CREATE TABLE rates
-(
-    r_id serial NOT NULL,
-    r_usd_byn numeric NULL,
-    r_byn_usd numeric NULL,
-    r_eur_byn numeric NULL,
-    r_byn_eur numeric NULL,
-    r_rub_byn numeric NULL,
-    r_byn_rub numeric NULL,
-    r_date date NULL
-)
-;
-
-CREATE TABLE users
-(
-    u_id uuid NOT NULL,
+    u_id SERIAL PRIMARY KEY,
     u_first_name varchar(50) NOT NULL,
     u_last_name varchar(50) NOT NULL,
-    u_date_birth date NULL,
-    u_number_passport varchar(50) NOT NULL
-)
-;
+    u_date_birth date NOT NULL,
+    u_number_passport varchar(50) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS cards
+(
+    c_id SERIAL PRIMARY KEY,
+    c_number varchar(16) UNIQUE NOT NULL,
+    c_pin_code smallint NOT NULL,
+    c_currency varchar(10) NOT NULL DEFAULT 'BYN',
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at DATE NOT NULL,
+    c_balance DECIMAL(15,2) NOT NULL,
+    c_user_id INTEGER REFERENCES users(u_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS payments
+(
+    p_id SERIAL PRIMARY KEY,
+    p_name varchar(100) NOT NULL,
+    p_description text,
+    p_code integer UNIQUE NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE IF NOT EXISTS rates
+(
+    r_id serial PRIMARY KEY,
+    r_base_currency varchar(10) NOT NULL,
+    r_target_currency varchar(10) NOT NULL,
+    r_rate DECIMAL(15,4) NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (r_base_currency, r_target_currency)
+);
+
+CREATE TABLE IF NOT EXISTS transactions (
+      t_id SERIAL PRIMARY KEY,
+      t_card_id INTEGER REFERENCES cards(c_id),
+      t_type transaction_type NOT NULL,
+      t_amount DECIMAL(15,2) NOT NULL,
+      t_currency varchar(10) NOT NULL,
+      t_base_amount DECIMAL(15,2) NOT NULL,
+      t_base_currency varchar(10) NOT NULL,
+      t_rate DECIMAL(15,6),
+      t_description TEXT,
+      t_target_card_number VARCHAR(16),
+      t_payment_code VARCHAR(10),
+      status transaction_status DEFAULT 'COMPLETED',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 
 /* Create Primary Keys, Indexes, Uniques, Checks */
 
-ALTER TABLE cards ADD CONSTRAINT "PK_cards"
-    PRIMARY KEY (c_id)
-;
+CREATE INDEX IF NOT EXISTS idx_cards_c_number ON cards(c_number);
+CREATE INDEX IF NOT EXISTS idx_rates_pair ON rates(r_base_currency, r_target_currency);
+CREATE INDEX IF NOT EXISTS idx_transactions_created_at ON transactions(created_at);
+CREATE INDEX IF NOT EXISTS idx_transactions_card_id ON transactions(t_card_id);
 
-ALTER TABLE cards
-    ADD CONSTRAINT "UQ_cardes_c_number" UNIQUE (c_number)
-;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
-CREATE INDEX "IXFK_cards_users" ON cards (u_id ASC)
-;
+-- Add check for rates
+ALTER TABLE rates ADD CHECK (r_base_currency != r_target_currency);
 
-ALTER TABLE m2m_cards_payments ADD CONSTRAINT "PK_m2m_cards_payments"
-    PRIMARY KEY (c_id,p_id,pm_amount,pm_date)
-;
+-- Add checks for cards
+ALTER TABLE cards ADD CHECK (c_balance >= 0);
+ALTER TABLE cards ADD CHECK (c_pin_code BETWEEN 0 AND 9999);
 
-CREATE INDEX "IXFK_m2m_cards_payments_cards" ON m2m_cards_payments (c_id ASC)
-;
+-- Add checks for transactions
+ALTER TABLE transactions ADD CHECK (t_amount > 0);
+ALTER TABLE transactions ADD CHECK (t_base_amount > 0);
 
-CREATE INDEX "IXFK_m2m_cards_payments_payments" ON m2m_cards_payments (p_id ASC)
-;
-
-ALTER TABLE payments ADD CONSTRAINT "PK_payments"
-    PRIMARY KEY (p_id)
-;
-
-ALTER TABLE rates ADD CONSTRAINT "PK_rates"
-    PRIMARY KEY (r_id)
-;
-
-ALTER TABLE users ADD CONSTRAINT "PK_users"
-    PRIMARY KEY (u_id)
-;
-
-/* Create Foreign Key Constraints */
-
-ALTER TABLE cards ADD CONSTRAINT "FK_cards_users"
-    FOREIGN KEY (u_id) REFERENCES users (u_id) ON DELETE Cascade ON UPDATE No Action
-;
-
-ALTER TABLE m2m_cards_payments ADD CONSTRAINT "FK_m2m_cards_payments_cards"
-    FOREIGN KEY (c_id) REFERENCES cards (c_id) ON DELETE No Action ON UPDATE No Action
-;
+-- Add indexes for increase producing
+CREATE INDEX IF NOT EXISTS idx_cards_user_id ON cards(c_user_id);
+CREATE INDEX IF NOT EXISTS idx_cards_currency ON cards(c_currency);
+CREATE INDEX IF NOT EXISTS idx_transactions_type ON transactions(t_type);
+CREATE INDEX IF NOT EXISTS idx_transactions_currency ON transactions(t_currency);
+CREATE INDEX IF NOT EXISTS idx_transactions_status ON transactions(status);
+CREATE INDEX IF NOT EXISTS idx_payments_code ON payments(p_code);

@@ -1,13 +1,13 @@
 package com.atm.repository;
 
-import com.atm.models.entities.User;
+import com.atm.models.entities.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
-Optional<User> findByUserNumberPassport (String numberPassport);
+public interface PaymentRepository extends JpaRepository<Payment, Long> {
+    Optional<Payment> findByPaymentCode(Integer paymentCode);
 
 }
