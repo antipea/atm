@@ -3,8 +3,6 @@ package com.atm.service.impl;
 import com.atm.dto.TransferDTO;
 import com.atm.dto.request.TransactionRequestDTO;
 import com.atm.dto.responce.TransactionResponseDTO;
-import com.atm.exception.InsufficientFundsException;
-import com.atm.exception.InvalidCardException;
 import com.atm.exception.TransactionErrorException;
 import com.atm.model.entity.Card;
 import com.atm.model.entity.Transaction;
@@ -14,6 +12,7 @@ import com.atm.service.RateService;
 import com.atm.service.TransactionService;
 import com.atm.util.TransactionBuilder;
 import com.atm.util.TransactionConverter;
+import com.atm.util.Validation;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -79,9 +78,7 @@ public class TransactionServiceImpl implements TransactionService {
                     card.getCardCurrency()
             );
 
-            if (card.getCardBalance().compareTo(convertedAmount) < 0) {
-                throw new InsufficientFundsException("Недостаточно средств на счете");
-            }
+            Validation.validateAmount(BigDecimal.valueOf(card.getCardBalance().compareTo(convertedAmount)));
 
             // Updated balanced
             BigDecimal newBalance = card.getCardBalance().subtract(convertedAmount);
@@ -112,9 +109,7 @@ public class TransactionServiceImpl implements TransactionService {
             Card sourceCard = cardService.getCardById(cardId);
             Card targetCard = cardService.getCardByNumber(transferDTO.getTargetCardNumber());
 
-            if (targetCard == null) {
-                throw new InvalidCardException("Некорректная карта для перевода");
-            }
+            Validation.validateCardNumber(targetCard.getCardNumber());
 
             // Convert sum to rate
             BigDecimal convertedAmount = rateService.convertCurrency(
@@ -123,9 +118,7 @@ public class TransactionServiceImpl implements TransactionService {
                     sourceCard.getCardCurrency()
             );
 
-            if (sourceCard.getCardBalance().compareTo(convertedAmount) < 0) {
-                throw new InsufficientFundsException("Недостаточно средств на счете");
-            }
+            Validation.validateAmount(BigDecimal.valueOf(sourceCard.getCardBalance().compareTo(convertedAmount)));
 
             // Convert sum to rate
             BigDecimal targetConvertedAmount = rateService.convertCurrency(

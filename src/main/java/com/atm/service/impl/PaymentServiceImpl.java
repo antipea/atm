@@ -2,7 +2,6 @@ package com.atm.service.impl;
 
 import com.atm.dto.PaymentDTO;
 import com.atm.dto.responce.TransactionResponseDTO;
-import com.atm.exception.InsufficientFundsException;
 import com.atm.exception.PaymentNotFoundException;
 import com.atm.model.entity.Card;
 import com.atm.model.entity.Payment;
@@ -12,8 +11,10 @@ import com.atm.repository.PaymentRepository;
 import com.atm.repository.TransactionRepository;
 import com.atm.service.PaymentService;
 import com.atm.service.RateService;
+import com.atm.service.TransactionService;
 import com.atm.util.TransactionBuilder;
 import com.atm.util.TransactionConverter;
+import com.atm.util.Validation;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,7 @@ public class PaymentServiceImpl implements PaymentService {
     private PaymentRepository paymentRepository;
 
     @Autowired
-    private TransactionServiceImpl transactionService;
+    private TransactionService transactionService;
 
     @Autowired
     private CardServiceImpl cardService;
@@ -58,9 +59,7 @@ public class PaymentServiceImpl implements PaymentService {
                 card.getCardCurrency()
         );
 
-        if (card.getCardBalance().compareTo(convertedAmount) < 0) {
-            throw new InsufficientFundsException("Средств недостаточно для вполнения операции");
-        }
+        Validation.validateAmount(BigDecimal.valueOf(card.getCardBalance().compareTo(convertedAmount)));
 
         BigDecimal newBalance = card.getCardBalance().subtract(convertedAmount);
         cardService.updateBalance(cardId, newBalance);
