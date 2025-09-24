@@ -1,6 +1,6 @@
 package com.atm.repository;
 
-import com.atm.models.entities.Transaction;
+import com.atm.model.entity.Transaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

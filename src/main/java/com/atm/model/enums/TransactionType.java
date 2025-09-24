@@ -1,4 +1,4 @@
-package com.atm.models.enums;
+package com.atm.model.enums;
 
 public enum TransactionType {
     DEPOSIT,

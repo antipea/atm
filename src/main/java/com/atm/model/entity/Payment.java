@@ -1,4 +1,4 @@
-package com.atm.models.entities;
+package com.atm.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -26,10 +26,10 @@ public class Payment {
     private String paymentDescription;
 
     @Column(name="p_code", unique = true, nullable = false)
-    private Integer paymentCode;
+    private int paymentCode;
 
     @Column(name = "is_active")
-    private Boolean isActive;
+    private boolean isActive;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -37,11 +37,11 @@ public class Payment {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public Boolean getActive() {
+    public boolean getActive() {
         return isActive;
     }
 
-    public void setActive(Boolean active) {
+    public void setActive(boolean active) {
         isActive = active;
     }
 }

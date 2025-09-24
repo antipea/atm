@@ -1,4 +1,4 @@
-package com.atm.models.entities;
+package com.atm.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

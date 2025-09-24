@@ -1,7 +1,7 @@
-package com.atm.controllers;
+package com.atm.controller;
 
 import com.atm.dto.BalanceDTO;
-import com.atm.services.BalanceService;
+import com.atm.service.BalanceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -11,11 +11,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/balance")
-@CrossOrigin(origins = "*")
 @Tag(name = "Баланс", description = "Операции с балансом карт")
 public class BalanceController {
 
@@ -32,11 +34,7 @@ public class BalanceController {
     })
     public ResponseEntity<BalanceDTO> getBalance(@Parameter(description = "ID карты", example = "1")
                                                  @PathVariable Long cardId) {
-        try {
-            BalanceDTO balanceDTO = balanceService.getBalanceInThreeCurrencies(cardId);
-            return ResponseEntity.ok(balanceDTO);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+        BalanceDTO balanceDTO = balanceService.getBalanceInThreeCurrencies(cardId);
+        return ResponseEntity.ok(balanceDTO);
     }
 }
