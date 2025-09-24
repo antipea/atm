@@ -10,5 +10,5 @@ public class AuthDTO {
     private String cardNumber;
 
     @Schema(description = "PIN-код", example = "1234")
-    private Short pinCode;
+    private short pinCode;
 }

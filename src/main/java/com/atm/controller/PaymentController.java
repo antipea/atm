@@ -1,9 +1,8 @@
-package com.atm.controllers;
+package com.atm.controller;
 
 import com.atm.dto.PaymentDTO;
 import com.atm.dto.responce.TransactionResponseDTO;
-import com.atm.models.entities.Transaction;
-import com.atm.services.PaymentService;
+import com.atm.service.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/payments")
-@CrossOrigin(origins = "*")
 @Tag(name = "Платежи", description = "Операции с платежами")
 public class PaymentController {
 
@@ -40,26 +38,9 @@ public class PaymentController {
                                                               @PathVariable Long cardId,
                                                               @Parameter(description = "Данные для оплаты")
                                                               @RequestBody PaymentDTO paymentDTO) {
-        try {
-            Transaction transaction = paymentService.makePayment(cardId, paymentDTO);
-            return ResponseEntity.ok(convertToDTO(transaction));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+        TransactionResponseDTO response = paymentService.convertToDTO(paymentService.makePayment(cardId, paymentDTO));
+        return ResponseEntity.ok(response);
     }
 
-    private TransactionResponseDTO convertToDTO(Transaction transaction) {
-        TransactionResponseDTO transactionDTO = new TransactionResponseDTO();
-        transactionDTO.setId(transaction.getId());
-        transactionDTO.setType(transaction.getType().name());
-        transactionDTO.setAmount(transaction.getAmount());
-        transactionDTO.setCurrency(transaction.getCurrency());
-        transactionDTO.setBaseAmount(transaction.getBaseAmount());
-        transactionDTO.setBaseCurrency(transaction.getBaseCurrency());
-        transactionDTO.setDescription(transaction.getDescription());
-        transactionDTO.setStatus(transaction.getStatus().name());
-        transactionDTO.setCreatedAt(transaction.getCreatedAt());
-        return transactionDTO;
-    }
 }
 

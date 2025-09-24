@@ -1,6 +1,7 @@
-package com.atm.services;
+package com.atm.service;
 
-import com.atm.models.entities.Rate;
+import com.atm.exception.RateNotFoundException;
+import com.atm.model.entity.Rate;
 import com.atm.repository.RateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,7 @@ public class RateService {
 
         return rateRepository.findByBaseCurrencyAndTargetCurrency(fromCurrency, toCurrency)
                 .map(Rate::getRate)
-                .orElseThrow(() -> new RuntimeException("Курс обмена " + fromCurrency + " в " + toCurrency + " не найден"));
+                .orElseThrow(() -> new RateNotFoundException("Курс обмена " + fromCurrency + " в " + toCurrency + " не найден"));
     }
 
     public BigDecimal convertCurrency(BigDecimal amount, String fromCurrency, String toCurrency) {
@@ -29,7 +30,6 @@ public class RateService {
         }
 
         if (fromCurrency.equals(toCurrency)) {
-
             return amount;
         }
 
@@ -39,7 +39,7 @@ public class RateService {
 
             return result;
         } catch (Exception e) {
-            throw new RuntimeException("Ошибка конвертирования " + amount + " " + fromCurrency + " в " + toCurrency + ": " + e.getMessage(), e);
+            throw new RateNotFoundException("Ошибка конвертирования " + amount + " " + fromCurrency + " в " + toCurrency + ": " + e.getMessage());
         }
     }
 

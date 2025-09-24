@@ -1,7 +1,7 @@
-package com.atm.models.entities;
+package com.atm.model.entity;
 
-import com.atm.models.enums.TransactionStatus;
-import com.atm.models.enums.TransactionType;
+import com.atm.model.enums.TransactionStatus;
+import com.atm.model.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

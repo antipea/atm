@@ -1,6 +1,6 @@
 package com.atm.repository;
 
-import com.atm.models.entities.Payment;
+import com.atm.model.entity.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -8,6 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
-    Optional<Payment> findByPaymentCode(Integer paymentCode);
+    Optional<Payment> findByPaymentCode(int paymentCode);
 
 }

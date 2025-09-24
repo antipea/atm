@@ -1,14 +1,17 @@
-package com.atm.services;
+package com.atm.service.impl;
 
 import com.atm.dto.BalanceDTO;
-import com.atm.models.entities.Card;
+import com.atm.model.entity.Card;
+import com.atm.service.BalanceService;
+import com.atm.service.CardService;
+import com.atm.service.RateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
 @Service
-public class BalanceService {
+public class BalanceServiceImpl implements BalanceService {
 
     @Autowired
     private CardService cardService;

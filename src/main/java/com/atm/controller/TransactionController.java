@@ -1,10 +1,9 @@
-package com.atm.controllers;
+package com.atm.controller;
 
 import com.atm.dto.TransferDTO;
 import com.atm.dto.request.TransactionRequestDTO;
 import com.atm.dto.responce.TransactionResponseDTO;
-import com.atm.models.entities.Transaction;
-import com.atm.services.TransactionService;
+import com.atm.service.TransactionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/transactions")
-@CrossOrigin(origins = "*")
 @Tag(name = "Транзакции", description = "Операции с транзакциями")
 public class TransactionController {
 
@@ -38,13 +36,8 @@ public class TransactionController {
                                                           @PathVariable Long cardId,
                                                           @Parameter(description = "Данные для пополнения денег")
                                                           @RequestBody TransactionRequestDTO transactionRequestDTO) {
-        try {
-            Transaction transaction = transactionService.deposit(cardId, transactionRequestDTO);
-
-            return ResponseEntity.ok(convertToDTO(transaction));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+        TransactionResponseDTO response = transactionService.convertToDTO(transactionService.deposit(cardId, transactionRequestDTO));
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{cardId}/withdraw")
@@ -61,12 +54,8 @@ public class TransactionController {
                                                            @PathVariable Long cardId,
                                                            @Parameter(description = "Данные для снятия денег")
                                                            @RequestBody TransactionRequestDTO requestDTO) {
-        try {
-            Transaction transaction = transactionService.withdraw(cardId, requestDTO);
-            return ResponseEntity.ok(convertToDTO(transaction));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+        TransactionResponseDTO response = transactionService.convertToDTO(transactionService.withdraw(cardId, requestDTO));
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{cardId}/transfer")
@@ -83,26 +72,7 @@ public class TransactionController {
                                                            @PathVariable Long cardId,
                                                            @Parameter(description = "Данные для перевода")
                                                            @RequestBody TransferDTO transferDTO) {
-        try {
-            Transaction transaction = transactionService.transfer(cardId, transferDTO);
-            return ResponseEntity.ok(convertToDTO(transaction));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-    private TransactionResponseDTO convertToDTO(Transaction transaction) {
-        TransactionResponseDTO transactionDTO = new TransactionResponseDTO();
-        transactionDTO.setId(transaction.getId());
-        transactionDTO.setType(transaction.getType().name());
-        transactionDTO.setAmount(transaction.getAmount());
-        transactionDTO.setCurrency(transaction.getCurrency());
-        transactionDTO.setBaseAmount(transaction.getBaseAmount());
-        transactionDTO.setBaseCurrency(transaction.getBaseCurrency());
-        transactionDTO.setDescription(transaction.getDescription());
-        transactionDTO.setStatus(transaction.getStatus().name());
-        transactionDTO.setCreatedAt(transaction.getCreatedAt());
-
-        return transactionDTO;
+        TransactionResponseDTO response = transactionService.convertToDTO(transactionService.transfer(cardId, transferDTO));
+        return ResponseEntity.ok(response);
     }
 }

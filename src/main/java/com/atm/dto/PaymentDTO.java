@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 public class PaymentDTO {
 
     @Schema(description = "Код услуги", example = "1001")
-    private Integer paymentCode;
+    private int paymentCode;
 
     @Schema(description = "Сумма", example = "75.50")
     private BigDecimal amount;

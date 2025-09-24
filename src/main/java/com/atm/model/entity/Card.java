@@ -1,6 +1,9 @@
-package com.atm.models.entities;
+package com.atm.model.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -8,6 +11,9 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name="cards")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Card {
 
     @Id
@@ -19,13 +25,13 @@ public class Card {
     private String cardNumber;
 
     @Column(name="c_pin_code", nullable = false)
-    private Short cardPinCode;
+    private short cardPinCode;
 
     @Column(name = "c_currency", nullable = false)
     private String cardCurrency;
 
     @Column(name = "is_active")
-    private Boolean isActive;
+    private boolean isActive;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -41,9 +47,6 @@ public class Card {
 
     @JoinColumn(name = "c_user_id", nullable = false)
     private Long userId;
-
-    public Card() {
-    }
 
     public Long getCardId() {
         return cardId;
@@ -61,11 +64,11 @@ public class Card {
         this.cardNumber = cardNumber;
     }
 
-    public Short getCardPinCode() {
+    public short getCardPinCode() {
         return cardPinCode;
     }
 
-    public void setCardPinCode(Short cardPinCode) {
+    public void setCardPinCode(short cardPinCode) {
         this.cardPinCode = cardPinCode;
     }
 
@@ -89,11 +92,11 @@ public class Card {
         this.cardBalance = cardPBalance;
     }
 
-    public Boolean getActive() {
+    public boolean getActive() {
         return isActive;
     }
 
-    public void setActive(Boolean active) {
+    public void setActive(boolean active) {
         isActive = active;
     }
 
